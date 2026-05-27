@@ -31,7 +31,7 @@ class ProductsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.redAccent,
         title: const Text('Loja Online'),
         actions: [
           const Icon(Icons.shopping_cart),

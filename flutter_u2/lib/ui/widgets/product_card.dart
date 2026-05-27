@@ -48,6 +48,7 @@ class _ProductCardState extends State<ProductCard> {
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
+                color: Colors.amber
               ),
             ),
             const SizedBox(height: 4),
@@ -71,7 +72,7 @@ class _ProductCardState extends State<ProductCard> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: Colors.indigo,
+                color: Colors.black87,
               ),
             ),
             const SizedBox(height: 6),
@@ -81,7 +82,7 @@ class _ProductCardState extends State<ProductCard> {
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 66, 92, 242),
+                  backgroundColor: const Color.fromARGB(255, 167, 22, 53),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   shape: RoundedRectangleBorder(

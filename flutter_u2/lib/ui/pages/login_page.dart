@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF101828), Color(0xFF1D4ED8)],
+            colors: [Color(0xFF101828), Color.fromARGB(255, 216, 29, 76)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      const Icon(Icons.storefront, size: 64, color: Colors.indigo),
+                      const Icon(Icons.workspace_premium, size: 64, color: Colors.redAccent),
                       const SizedBox(height: 16),
                       const Text(
                         'Minha aplicação',
@@ -127,6 +127,23 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         onPressed: _handleLogin,
                         child: const Text('Login'),
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.black54,
+                          textStyle: const TextStyle(fontSize: 14),
+                        ),
+                        child: const Text('Esqueceu sua senha?'),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.black54,
+                          textStyle: const TextStyle(fontSize: 14),
+                        ),
+                        child: const Text('Não tem uma conta? Cadastre-se'),
                       ),
                     ],
                   ),
