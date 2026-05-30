@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_u2/data/auth_service.dart';
+import 'package:flutter_u2/data/session_service.dart';
 import 'package:flutter_u2/ui/pages/products_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -9,13 +11,14 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static const String expectedUser = 'admin';
-  static const String expectedPassword = 'admin';
+  final AuthService _authService = AuthService();
+  final SessionService _sessionService = SessionService();
 
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   String? _errorMessage;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -24,26 +27,54 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _handleLogin() {
-    final user = _userController.text.trim();
+  Future<void> _handleLogin() async {
+    final username = _userController.text.trim();
     final password = _passwordController.text;
 
-    if (user == expectedUser && password == expectedPassword) {
+    if (username.isEmpty || password.isEmpty) {
       setState(() {
-        _errorMessage = null;
+        _errorMessage = 'Informe usuário e senha.';
       });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final token = await _authService.login(
+        username: username,
+        password: password,
+      );
+
+      await _sessionService.saveSession(
+        username: username,
+        password: password,
+        token: token,
+      );
+
+      if (!mounted) return;
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
           builder: (_) => const ProductsPage(),
         ),
       );
-      return;
-    }
+    } catch (_) {
+      if (!mounted) return;
 
-    setState(() {
-      _errorMessage = 'Usuário ou senha inválidos.';
-    });
+      setState(() {
+        _errorMessage = 'Usuário ou senha inválidos.';
+      });
+    } finally {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -73,16 +104,24 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      const Icon(Icons.workspace_premium, size: 64, color: Colors.redAccent),
+                      const Icon(
+                        Icons.workspace_premium,
+                        size: 64,
+                        color: Colors.redAccent,
+                      ),
                       const SizedBox(height: 16),
                       const Text(
                         'Minha aplicação',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       TextField(
                         controller: _userController,
+                        enabled: !_isLoading,
                         decoration: const InputDecoration(
                           labelText: 'Usuário',
                           prefixIcon: Icon(Icons.person),
@@ -92,6 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 16),
                       TextField(
                         controller: _passwordController,
+                        enabled: !_isLoading,
                         obscureText: true,
                         decoration: const InputDecoration(
                           labelText: 'Senha',
@@ -114,7 +154,12 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 167, 22, 53),
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            167,
+                            22,
+                            53,
+                          ),
                           foregroundColor: Colors.white,
                           textStyle: const TextStyle(
                             fontSize: 18,
@@ -125,12 +170,22 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        onPressed: _handleLogin,
-                        child: const Text('Login'),
+                        onPressed: _isLoading ? null : _handleLogin,
+                        child:
+                            _isLoading
+                                ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                : const Text('Login'),
                       ),
                       const SizedBox(height: 12),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: _isLoading ? null : () {},
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.black54,
                           textStyle: const TextStyle(fontSize: 14),
@@ -138,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: const Text('Esqueceu sua senha?'),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: _isLoading ? null : () {},
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.black54,
                           textStyle: const TextStyle(fontSize: 14),

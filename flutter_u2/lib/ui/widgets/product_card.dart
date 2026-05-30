@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_u2/data/product_model.dart';
 
-class ProductCard extends StatefulWidget {
+class ProductCard extends StatelessWidget {
   const ProductCard({super.key, required this.product});
 
   final Product product;
 
   @override
-  State<ProductCard> createState() => _ProductCardState();
-}
-
-class _ProductCardState extends State<ProductCard> {
-  @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
       ),
@@ -32,28 +28,43 @@ class _ProductCardState extends State<ProductCard> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image(
+                child: Image.network(
+                  product.imageUrl,
                   width: double.infinity,
-                  image:
-                      widget.product.image ??
-                      const AssetImage('lib/assets/images/placeholder.png'),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'lib/assets/images/placeholder.png',
+                      fit: BoxFit.cover,
+                    );
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    }
+
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
                 ),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              widget.product.name,
+              product.name,
               textAlign: TextAlign.left,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: Colors.amber
+                color: Colors.black87,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              widget.product.description,
+              product.description,
               textAlign: TextAlign.left,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -64,7 +75,7 @@ class _ProductCardState extends State<ProductCard> {
             ),
             const SizedBox(height: 8),
             Text(
-              widget.product.price,
+              product.formattedPrice,
               textAlign: TextAlign.left,
               maxLines: 1,
               softWrap: false,

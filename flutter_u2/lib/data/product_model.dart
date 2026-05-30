@@ -1,15 +1,29 @@
-import 'package:flutter/material.dart';
-
 class Product {
   const Product({
+    required this.id,
     required this.name,
     required this.description,
     required this.price,
-    this.image,
+    required this.imageUrl,
   });
 
+  final int id;
   final String name;
   final String description;
-  final String price;
-  final ImageProvider? image;
+  final double price;
+  final String imageUrl;
+
+  String get formattedPrice {
+    return 'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
+  }
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: (json['id'] as num).toInt(),
+      name: json['title']?.toString() ?? 'Produto sem nome',
+      description: json['description']?.toString() ?? 'Sem descrição',
+      price: (json['price'] as num).toDouble(),
+      imageUrl: json['thumbnail']?.toString() ?? '',
+    );
+  }
 }
