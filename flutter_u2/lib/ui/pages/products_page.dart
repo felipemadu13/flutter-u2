@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_u2/data/product_model.dart';
-import 'package:flutter_u2/data/product_service.dart';
-import 'package:flutter_u2/data/session_service.dart';
+import 'package:flutter_u2/data/model/product_model.dart';
+import 'package:flutter_u2/data/services/product_service.dart';
+import 'package:flutter_u2/data/services/session_service.dart';
 import 'package:flutter_u2/ui/pages/login_page.dart';
 import 'package:flutter_u2/ui/widgets/product_card.dart';
 

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter_u2/data/product_model.dart';
+import 'package:flutter_u2/data/model/product_model.dart';
 import 'package:http/http.dart' as http;
 
 class ProductService {
