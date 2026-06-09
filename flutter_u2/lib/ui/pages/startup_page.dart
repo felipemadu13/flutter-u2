@@ -32,20 +32,21 @@ class _StartupPageState extends State<StartupPage> {
     }
 
     try {
-      final token = await _authService.login(
+      final loginResult = await _authService.login(
         username: credentials.username,
         password: credentials.password,
       );
 
       await _sessionService.saveSession(
+        userId: loginResult.userId,
         username: credentials.username,
         password: credentials.password,
-        token: token,
+        token: loginResult.token,
       );
 
       if (!mounted) return;
 
-      _goToProducts();
+      _goToProducts(credentials.userId);
     } catch (_) {
       await _sessionService.clearSession();
 
@@ -63,10 +64,10 @@ class _StartupPageState extends State<StartupPage> {
     );
   }
 
-  void _goToProducts() {
+  void _goToProducts(String userId) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => const ProductsPage(),
+        builder: (_) => ProductsPage(userId: userId),
       ),
     );
   }
