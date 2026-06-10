@@ -1,10 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+class LoginResult {
+  const LoginResult({
+    required this.token,
+    required this.userId,
+  });
+
+  final String token;
+  final String userId;
+}
+
 class AuthService {
   static const String _baseUrl = 'https://dummyjson.com';
 
-  Future<String> login({
+  Future<LoginResult> login({
     required String username,
     required String password,
   }) async {
@@ -31,6 +41,11 @@ class AuthService {
       throw Exception('Token inválido.');
     }
 
-    return token.toString();
+    final userId = data['id']?.toString().trim();
+
+    return LoginResult(
+      token: token.toString(),
+      userId: userId == null || userId.isEmpty ? username : userId,
+    );
   }
 }

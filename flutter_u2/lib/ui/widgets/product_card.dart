@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_u2/data/model/product_model.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({super.key, required this.product});
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.onBuyPressed,
+  });
 
   final Product product;
+  final VoidCallback onBuyPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +96,7 @@ class ProductCard extends StatelessWidget {
               width: double.infinity,
               height: 32,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: onBuyPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 167, 22, 53),
                   foregroundColor: Colors.white,

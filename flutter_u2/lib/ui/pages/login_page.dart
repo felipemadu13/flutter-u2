@@ -44,22 +44,23 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final token = await _authService.login(
+      final loginResult = await _authService.login(
         username: username,
         password: password,
       );
 
       await _sessionService.saveSession(
+        userId: loginResult.userId,
         username: username,
         password: password,
-        token: token,
+        token: loginResult.token,
       );
 
       if (!mounted) return;
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
-          builder: (_) => const ProductsPage(),
+          builder: (_) => ProductsPage(userId: loginResult.userId),
         ),
       );
     } catch (_) {

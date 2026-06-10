@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_u2/data/model/cart_item_model.dart';
 import 'package:flutter_u2/data/model/product_model.dart';
+import 'package:flutter_u2/data/services/cart_storage_service.dart';
 import 'package:flutter_u2/data/services/product_service.dart';
 import 'package:flutter_u2/data/services/session_service.dart';
+import 'package:flutter_u2/ui/pages/cart_page.dart';
 import 'package:flutter_u2/ui/pages/login_page.dart';
 import 'package:flutter_u2/ui/widgets/product_card.dart';
 
 class ProductsPage extends StatefulWidget {
-  const ProductsPage({super.key});
+  const ProductsPage({super.key, required this.userId});
+
+  final String userId;
 
   @override
   State<ProductsPage> createState() => _ProductsPageState();
@@ -15,19 +20,96 @@ class ProductsPage extends StatefulWidget {
 class _ProductsPageState extends State<ProductsPage> {
   final ProductService _productService = ProductService();
   final SessionService _sessionService = SessionService();
+  final CartStorageService _cartStorageService = CartStorageService();
+  final List<CartItem> _cartItems = [];
 
   late Future<List<Product>> _productsFuture;
+  late final Future<void> _cartLoadFuture;
 
   @override
   void initState() {
     super.initState();
     _productsFuture = _productService.getProducts();
+    _cartLoadFuture = _loadCart();
   }
 
   void _reloadProducts() {
     setState(() {
       _productsFuture = _productService.getProducts();
     });
+  }
+
+  Future<void> _loadCart() async {
+    final storedItems = await _cartStorageService.loadCart(widget.userId);
+
+    if (!mounted) return;
+
+    setState(() {
+      _cartItems
+        ..clear()
+        ..addAll(storedItems);
+    });
+  }
+
+  Future<void> _persistCart() async {
+    await _cartStorageService.saveCart(widget.userId, _cartItems);
+  }
+
+  Future<void> _addToCart(Product product) async {
+    await _cartLoadFuture;
+
+    final existingItemIndex = _cartItems.indexWhere(
+      (item) => item.product.id == product.id,
+    );
+
+    final isNewItem = existingItemIndex == -1;
+
+    setState(() {
+      if (isNewItem) {
+        _cartItems.add(CartItem(product: product, quantity: 1));
+      } else {
+        final item = _cartItems[existingItemIndex];
+        _cartItems[existingItemIndex] = item.copyWith(
+          quantity: item.quantity + 1,
+        );
+      }
+    });
+
+    await _persistCart();
+
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            isNewItem
+                ? '${product.name} adicionado ao carrinho'
+                : 'Quantidade incrementada no carrinho',
+          ),
+        ),
+      );
+  }
+
+  Future<void> _openCartPage() async {
+    await _cartLoadFuture;
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder:
+            (_) => CartPage(
+              initialItems: _cartItems,
+              onCartUpdated: (updatedItems) {
+                setState(() {
+                  _cartItems
+                    ..clear()
+                    ..addAll(updatedItems);
+                });
+
+                _persistCart();
+              },
+            ),
+      ),
+    );
   }
 
   Future<void> _logout() async {
@@ -50,7 +132,13 @@ class _ProductsPageState extends State<ProductsPage> {
         backgroundColor: Colors.redAccent,
         title: const Text('Loja Online'),
         actions: [
-          const Icon(Icons.shopping_cart),
+          IconButton(
+            tooltip: 'Meu carrinho',
+            onPressed: () {
+              _openCartPage();
+            },
+            icon: const Icon(Icons.shopping_cart),
+          ),
           IconButton(
             tooltip: 'Sair',
             onPressed: _logout,
@@ -111,7 +199,10 @@ class _ProductsPageState extends State<ProductsPage> {
               childAspectRatio: 0.52,
             ),
             itemBuilder: (context, index) {
-              return ProductCard(product: products[index]);
+              return ProductCard(
+                product: products[index],
+                onBuyPressed: () => _addToCart(products[index]),
+              );
             },
           );
         },
